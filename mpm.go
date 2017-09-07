@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	goconf "github.com/akrennmair/goconf"
+	"github.com/kingsoft-wps/go/log"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
 )
@@ -18,7 +18,7 @@ type Cfg struct {
 	LogFile      string
 	LogLevel     int
 	FalconClient string
-	Endpoint string
+	Endpoint     string
 
 	User string
 	Pass string
@@ -35,26 +35,26 @@ func init() {
 
 	if _, err := os.Stat(cfgFile); err != nil {
 		if os.IsNotExist(err) {
-			log.WithField("cfg", cfgFile).Fatalf("myMon config file does not exists: %v", err)
+			log.Fatal("myMon config file does not exists: %v", err)
 		}
 	}
 
 	if err := cfg.readConf(cfgFile); err != nil {
-		log.Fatalf("Read configure file failed: %v", err)
+		log.Fatal("Read configure file failed: %v", err)
 	}
 
 	// Init log file
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(log.Level(cfg.LogLevel))
+	//	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(4) //Info=4
 
 	if cfg.LogFile != "" {
-		f, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		_, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 		if err == nil {
-			log.SetOutput(f)
+			//	log.SetOutput(f)
 			return
 		}
 	}
-	log.SetOutput(os.Stderr)
+	//log.SetOutput(os.Stderr)
 }
 
 func (conf *Cfg) readConf(file string) error {
@@ -116,10 +116,10 @@ func MysqlAlive(m *MysqlIns, ok bool) {
 	}
 	msg, err := sendData([]*MetaData{data})
 	if err != nil {
-		log.Errorf("Send alive data failed: %v", err)
+		log.Error("Send alive data failed: %v", err)
 		return
 	}
-	log.Infof("Alive data response %s: %s", m.String(), string(msg))
+	log.Info("Alive data response %s: %s", m.String(), string(msg))
 }
 
 func FetchData(m *MysqlIns) (err error) {
@@ -136,6 +136,19 @@ func FetchData(m *MysqlIns) (err error) {
 	defer db.Close()
 
 	data := make([]*MetaData, 0)
+	/*-------------------------------------------------
+
+	slaveState_test, err := slaveStatus(m, db)
+	if err != nil {
+		return
+	}
+
+	data = append(data, slaveState_test...)
+	if true {
+		return
+	}
+	// ------------------------------------------------*/
+
 	globalStatus, err := GlobalStatus(m, db)
 	if err != nil {
 		return
@@ -164,7 +177,7 @@ func FetchData(m *MysqlIns) (err error) {
 	if err != nil {
 		return
 	}
-	log.Infof("Send response %s: %s", m.String(), string(msg))
+	log.Info("Send response %s: %s", m.String(), string(msg))
 	return
 }
 
@@ -182,6 +195,6 @@ func main() {
 		Tag:  fmt.Sprintf("port=%d", cfg.Port),
 	})
 	if err != nil {
-		log.Error(err)
+		log.Error("main exit err=%v", err)
 	}
 }

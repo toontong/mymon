@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/kingsoft-wps/go/log"
 )
 
 func sendData(data []*MetaData) ([]byte, error) {
@@ -16,9 +16,9 @@ func sendData(data []*MetaData) ([]byte, error) {
 		return nil, err
 	}
 
-	log.Debugf("Send to %s, size: %d", cfg.FalconClient, len(data))
+	log.Debug("Send to %s, size: %d", cfg.FalconClient, len(data))
 	for _, m := range data {
-		log.Debugf("%s", m)
+		log.Debug("%s", m)
 	}
 
 	res, err := http.Post(cfg.FalconClient, "Content-Type: application/json", bytes.NewBuffer(js))
