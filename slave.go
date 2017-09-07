@@ -36,23 +36,25 @@ func slaveStatus(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
 	// MySQL-5.7 支持 parallel-slave 特性
 	is_mutil_slave_thread := len(rows) > 1
 
-	data := make([]*MetaData, len(SlaveStatusToSend))
+	data := make([]*MetaData, len(SlaveStatusToSend)*len(rows))
+	lenght := len(SlaveStatusToSend)
 	for idx, row := range rows {
 		for i, s := range SlaveStatusToSend {
-			data[i] = NewMetric(s)
+			m := NewMetric(s)
+			data[idx*lenght+i] = m
 			switch s {
 			case "Slave_SQL_Running", "Slave_IO_Running":
-				data[i].SetValue(0)
+				m.SetValue(0)
 				v := row.Str(res.Map(s))
 				if v == "Yes" {
-					data[i].SetValue(1)
+					m.SetValue(1)
 				}
 			default:
 				v, err := row.Int64Err(res.Map(s))
 				if err != nil {
-					data[i].SetValue(-1)
+					m.SetValue(-1)
 				} else {
-					data[i].SetValue(v)
+					m.SetValue(v)
 				}
 			}
 			// the first default slave thread do not change.
@@ -61,8 +63,9 @@ func slaveStatus(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
 				if channel_name == "" {
 					log.Error("error on parse Channel_Name was empty.", err)
 				} else {
-					data[i].Endpoint = fmt.Sprintf("%s-%s", data[i].Endpoint, channel_name)
+					m.Endpoint = fmt.Sprintf("%s-%s", m.Endpoint, channel_name)
 					log.Info("MTS of Channel_Name=%v change Metric.Endponit.", channel_name)
+					//			println(fmt.Sprintf("MTS of Channel_Name=%v change Metric.Endponit.", channel_name))
 				}
 			}
 		}

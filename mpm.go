@@ -145,6 +145,9 @@ func FetchData(m *MysqlIns) (err error) {
 
 	data = append(data, slaveState_test...)
 	if true {
+		for _, r := range data {
+			println(fmt.Sprintf("slave-status : %v", r))
+		}
 		return
 	}
 	// ------------------------------------------------*/
