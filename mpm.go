@@ -39,22 +39,22 @@ func init() {
 		}
 	}
 
+	log.Info("using configure file[%v]", cfgFile)
 	if err := cfg.readConf(cfgFile); err != nil {
 		log.Fatal("Read configure file failed: %v", err)
 	}
 
-	// Init log file
-	//	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(4) //Info=4
-
 	if cfg.LogFile != "" {
-		_, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		log.Info("set log-file=[%v] level=[%v]", cfg.LogFile, cfg.LogLevel)
+		maxBytes, backupCount := 1024*1024*1024, 3 // 1G * 3
+		hdlr, err := log.NewRotatingFileHandler(cfg.LogFile, maxBytes, backupCount)
 		if err == nil {
-			//	log.SetOutput(f)
-			return
+			log.SetDefaultLogger(log.NewDefault(hdlr))
+		} else {
+			log.Error("NewRotatingFile() err=%v", err)
 		}
 	}
-	//log.SetOutput(os.Stderr)
+	log.SetLevel(cfg.LogLevel) //Info=2,Warn=3
 }
 
 func (conf *Cfg) readConf(file string) error {
