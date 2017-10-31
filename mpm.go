@@ -182,6 +182,7 @@ func FetchData(m *MysqlIns) (err error) {
 
 	msg, err := sendData(data)
 	if err != nil {
+		log.Error("sendData() err=%v", err)
 		return
 	}
 	log.Info("Send response %s: %s", m.String(), string(msg))
