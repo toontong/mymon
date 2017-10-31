@@ -154,24 +154,28 @@ func FetchData(m *MysqlIns) (err error) {
 
 	globalStatus, err := GlobalStatus(m, db)
 	if err != nil {
+		log.Error("GlobalStatus() err=%v", err)
 		return
 	}
 	data = append(data, globalStatus...)
 
 	globalVars, err := GlobalVariables(m, db)
 	if err != nil {
+		log.Error("GlobalVariables() err=%v", err)
 		return
 	}
 	data = append(data, globalVars...)
 
 	innodbState, err := innodbStatus(m, db)
 	if err != nil {
+		log.Error("innodbStatus() err=%v", err)
 		return
 	}
 	data = append(data, innodbState...)
 
 	slaveState, err := slaveStatus(m, db)
 	if err != nil {
+		log.Error("slaveStatus() err=%v", err)
 		return
 	}
 	data = append(data, slaveState...)
