@@ -231,6 +231,10 @@ var DataType = map[string]string{
 	"Table_locks_immediate":      DELTA_PS,
 	"Table_locks_waited":         DELTA_PS,
 	"Threads_created":            DELTA_PS,
+
+	//add by huangchuantong at 2017-11-17
+	"Table_open_cache_misses": DELTA_PS,
+	"Table_open_cache_hits":   DELTA_PS,
 }
 
 type MysqlIns struct {

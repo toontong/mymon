@@ -29,31 +29,41 @@ type Cfg struct {
 var cfg Cfg
 
 func init() {
+	log.SetLevel(2) //Info=2,Warn=3
+
 	var cfgFile string
-	flag.StringVar(&cfgFile, "c", "myMon.cfg", "myMon configure file")
+	flag.StringVar(&cfgFile, "c", "mymon.cfg", "myMon configure file")
 	flag.Parse()
 
 	if _, err := os.Stat(cfgFile); err != nil {
 		if os.IsNotExist(err) {
-			log.Fatal("myMon config file does not exists: %v", err)
+			println("Usage: mymon -c mymon.cfg")
+			return
 		}
 	}
 
 	log.Info("using configure file[%v]", cfgFile)
 	if err := cfg.readConf(cfgFile); err != nil {
-		log.Fatal("Read configure file failed: %v", err)
+		log.Error("Read configure file error=[%v]", err)
+		println("Usage: mymon -c ./etc/mon.cfg")
+		return
 	}
+
+	log.Info("Config=%+v", cfg)
 
 	if cfg.LogFile != "" {
 		log.Info("set log-file=[%v] level=[%v]", cfg.LogFile, cfg.LogLevel)
 		maxBytes, backupCount := 1024*1024*1024, 3 // 1G * 3
 		hdlr, err := log.NewRotatingFileHandler(cfg.LogFile, maxBytes, backupCount)
 		if err == nil {
+			log.Info("all log will Output to File[%v]", cfg.LogFile)
 			log.SetDefaultLogger(log.NewDefault(hdlr))
 		} else {
+			panic(err)
 			log.Error("NewRotatingFile() err=%v", err)
 		}
 	}
+
 	log.SetLevel(cfg.LogLevel) //Info=2,Warn=3
 }
 
@@ -127,10 +137,15 @@ func FetchData(m *MysqlIns) (err error) {
 		MysqlAlive(m, err == nil)
 	}()
 
+	log.Info("Try Connect MySQL(%s:%d?user=%s&pass=%s)",
+		cfg.Host, cfg.Port, cfg.User, cfg.Pass)
+
 	db := mysql.New("tcp", "", fmt.Sprintf("%s:%d", m.Host, m.Port),
 		cfg.User, cfg.Pass)
 	db.SetTimeout(500 * time.Millisecond)
 	if err = db.Connect(); err != nil {
+		log.Error("Connect(%s:%d?user=%s&pass=%s) fail err=[%s].",
+			m.Host, m.Port, cfg.User, cfg.Pass, err)
 		return
 	}
 	defer db.Close()
@@ -194,7 +209,6 @@ func (m *MysqlIns) String() string {
 }
 
 func main() {
-	log.Info("MySQL Monitor for falcon")
 	go timeout()
 
 	err := FetchData(&MysqlIns{
@@ -205,4 +219,7 @@ func main() {
 	if err != nil {
 		log.Error("main exit err=%v", err)
 	}
+	time.Sleep(time.Microsecond * 200)
+	log.Close()
+
 }

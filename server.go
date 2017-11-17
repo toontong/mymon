@@ -1,15 +1,18 @@
 package main
 
 import (
+	"github.com/kingsoft-wps/go/log"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
 )
 
 func GlobalStatus(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
+	log.Info("execute `SHOW /*!50001 GLOBAL */ STATUS`")
 	return mysqlState(m, db, "SHOW /*!50001 GLOBAL */ STATUS")
 }
 
 func GlobalVariables(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
+	log.Info("execute `SHOW /*!50001 GLOBAL */ VARIABLES`")
 	return mysqlState(m, db, "SHOW /*!50001 GLOBAL */ VARIABLES")
 }
 
@@ -26,6 +29,8 @@ func mysqlState(m *MysqlIns, db mysql.Conn, sql string) ([]*MetaData, error) {
 		v, err := row.Int64Err(1)
 		// Ignore non digital value
 		if err != nil {
+			log.Debug("noo digital key-val=[%v]->[%v]",
+				key_, row.Str(1))
 			continue
 		}
 
