@@ -233,8 +233,11 @@ var DataType = map[string]string{
 	"Threads_created":            DELTA_PS,
 
 	//add by huangchuantong at 2017-11-17
-	"Table_open_cache_misses": DELTA_PS,
-	"Table_open_cache_hits":   DELTA_PS,
+	"Table_open_cache_misses":     DELTA_PS,
+	"Table_open_cache_hits":       DELTA_PS,
+	"Ssl_session_cache_hits":      DELTA_PS,
+	"Tokudb_CACHETABLE_MISS":      DELTA_PS,
+	"Tokudb_CACHETABLE_MISS_TIME": DELTA_PS,
 }
 
 type MysqlIns struct {
