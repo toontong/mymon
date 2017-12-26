@@ -26,16 +26,29 @@ func mysqlState(m *MysqlIns, db mysql.Conn, sql string) ([]*MetaData, error) {
 	i := 0
 	for _, row := range rows {
 		key_ := row.Str(0)
-		v, err := row.Int64Err(1)
-		// Ignore non digital value
-		if err != nil {
-			log.Debug("noo digital key-val=[%v]->[%v]",
-				key_, row.Str(1))
-			continue
-		}
+		if wsrepStatus, ok := WsrepStatusToConvert[key_]; ok {
+			originVal := row.Str(1)
+			convertVal, ok := wsrepStatus[originVal];
+			if !ok {
+				log.Debug("noo expected key-val=[%v]->[%v]",
+					key_, originVal)
+				continue
+			}
 
-		data[i] = NewMetric(key_)
-		data[i].SetValue(v)
+			data[i] = NewMetric(key_)
+			data[i].SetValue(convertVal)
+		} else {
+			v, err := row.Int64Err(1)
+			// Ignore non digital value
+			if err != nil {
+				log.Debug("noo digital key-val=[%v]->[%v]",
+					key_, row.Str(1))
+				continue
+			}
+
+			data[i] = NewMetric(key_)
+			data[i].SetValue(v)
+		}
 		i++
 	}
 	return data[:i], nil
