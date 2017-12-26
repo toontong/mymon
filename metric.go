@@ -238,6 +238,16 @@ var DataType = map[string]string{
 	"Ssl_session_cache_hits":      DELTA_PS,
 	"Tokudb_CACHETABLE_MISS":      DELTA_PS,
 	"Tokudb_CACHETABLE_MISS_TIME": DELTA_PS,
+
+	// add by zhongshun at 2017-12-26, pxc related.
+	"wsrep_flow_control_sent":   DELTA_PS,
+	"wsrep_flow_control_recv":   DELTA_PS,
+	"wsrep_replicated":          DELTA_PS,
+	"wsrep_received":            DELTA_PS,
+	"wsrep_replicated_bytes":    DELTA_PS,
+	"wsrep_received_bytes":      DELTA_PS,
+	"wsrep_local_cert_failures": DELTA_PS,
+	"wsrep_local_bf_aborts":     DELTA_PS,
 }
 
 type MysqlIns struct {
