@@ -240,8 +240,6 @@ var DataType = map[string]string{
 	"Tokudb_CACHETABLE_MISS_TIME": DELTA_PS,
 
 	// add by zhongshun at 2017-12-26, pxc related.
-	"wsrep_flow_control_sent":   DELTA_PS,
-	"wsrep_flow_control_recv":   DELTA_PS,
 	"wsrep_replicated":          DELTA_PS,
 	"wsrep_received":            DELTA_PS,
 	"wsrep_replicated_bytes":    DELTA_PS,
