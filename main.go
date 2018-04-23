@@ -24,6 +24,9 @@ type Cfg struct {
 	Pass string
 	Host string
 	Port int
+
+	//是否 Percona 的ProxySQL
+	ProxySQL bool
 }
 
 var cfg Cfg
@@ -109,6 +112,9 @@ func (conf *Cfg) readConf(file string) error {
 	}
 
 	conf.Port, err = c.GetInt("mysql", "port")
+	var nPorxySQL int = 0
+	nPorxySQL, err = c.GetInt("mysql", "proxysql")
+	conf.ProxySQL = (nPorxySQL == 1)
 	return err
 }
 
@@ -167,38 +173,46 @@ func FetchData(m *MysqlIns) (err error) {
 	}
 	// ------------------------------------------------*/
 
-	globalStatus, err := GlobalStatus(m, db)
-	if err != nil {
-		log.Error("GlobalStatus() err=%v", err)
-		return
-	}
-	data = append(data, globalStatus...)
+	if cfg.ProxySQL {
+		globalStatus, err := ProxySQLGlobalStatus(m, db)
+		if err != nil {
+			log.Error("ProxySQLGlobalStatus() err=%v", err)
+			return err
+		}
+		data = append(data, globalStatus...)
+	} else {
+		globalStatus, err := GlobalStatus(m, db)
+		if err != nil {
+			log.Error("GlobalStatus() err=%v", err)
+			return err
+		}
+		data = append(data, globalStatus...)
 
-	globalVars, err := GlobalVariables(m, db)
-	if err != nil {
-		log.Error("GlobalVariables() err=%v", err)
-		return
-	}
-	data = append(data, globalVars...)
+		globalVars, err := GlobalVariables(m, db)
+		if err != nil {
+			log.Error("GlobalVariables() err=%v", err)
+			return err
+		}
+		data = append(data, globalVars...)
 
-	innodbState, err := innodbStatus(m, db)
-	if err != nil {
-		log.Error("innodbStatus() err=%v", err)
-		return
-	}
-	data = append(data, innodbState...)
+		innodbState, err := innodbStatus(m, db)
+		if err != nil {
+			log.Error("innodbStatus() err=%v", err)
+			return err
+		}
+		data = append(data, innodbState...)
 
-	slaveState, err := slaveStatus(m, db)
-	if err != nil {
-		log.Error("slaveStatus() err=%v", err)
-		return
+		slaveState, err := slaveStatus(m, db)
+		if err != nil {
+			log.Error("slaveStatus() err=%v", err)
+			return err
+		}
+		data = append(data, slaveState...)
 	}
-	data = append(data, slaveState...)
-
 	msg, err := sendData(data)
 	if err != nil {
 		log.Error("sendData() err=%v", err)
-		return
+		return err
 	}
 	log.Info("Send response %s: %s", m.String(), string(msg))
 	return

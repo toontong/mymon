@@ -14,6 +14,12 @@ func GlobalStatus(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
 func GlobalVariables(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
 	log.Info("execute `SHOW /*!50001 GLOBAL */ VARIABLES`")
 	return mysqlState(m, db, "SHOW /*!50001 GLOBAL */ VARIABLES")
+
+}
+
+func ProxySQLGlobalStatus(m *MysqlIns, db mysql.Conn) ([]*MetaData, error) {
+	log.Info("ProxySQL execute `SELECT * FROM stats_mysql_global;`")
+	return mysqlState(m, db, "SELECT * FROM stats_mysql_global")
 }
 
 func mysqlState(m *MysqlIns, db mysql.Conn, sql string) ([]*MetaData, error) {
@@ -28,7 +34,7 @@ func mysqlState(m *MysqlIns, db mysql.Conn, sql string) ([]*MetaData, error) {
 		key_ := row.Str(0)
 		if wsrepStatus, ok := WsrepStatusToConvert[key_]; ok {
 			originVal := row.Str(1)
-			convertVal, ok := wsrepStatus[originVal];
+			convertVal, ok := wsrepStatus[originVal]
 			if !ok {
 				log.Debug("noo expected key-val=[%v]->[%v]",
 					key_, originVal)

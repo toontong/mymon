@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -246,7 +247,16 @@ var DataType = map[string]string{
 	"wsrep_received_bytes":      DELTA_PS,
 	"wsrep_local_cert_failures": DELTA_PS,
 	"wsrep_local_bf_aborts":     DELTA_PS,
-}
+
+	//add by huangchuantong at 2018-04-23, percona proxysql的status状态
+	"Backend_query_time_nsec":     DELTA_PS,
+	"Query_Processor_time_nsec":   DELTA_PS,
+	"Server_Connections_created":  DELTA_PS,
+	"Client_Connections_created":  DELTA_PS,
+	"Client_Connections_aborted":  DELTA_PS,
+	"ConnPool_get_conn_immediate": DELTA_PS,
+	"ConnPool_get_conn_success":   DELTA_PS,
+} //如果要显示 为速率的，把key加到这个DataType的map中，val为DELTA_PS
 
 type MysqlIns struct {
 	Host string
@@ -255,6 +265,10 @@ type MysqlIns struct {
 }
 
 func dataType(key_ string) string {
+	if strings.HasPrefix(key_, "Com_") {
+		return DELTA_PS
+	}
+
 	if v, ok := DataType[key_]; ok {
 		return v
 	}
