@@ -180,6 +180,12 @@ func FetchData(m *MysqlIns) (err error) {
 			return err
 		}
 		data = append(data, globalStatus...)
+		globalStatus, err = ProxySQLConnectionPoolStats(m, db)
+		if err != nil {
+			log.Error("ProxySQLConnectionPoolStats() err=%v", err)
+			return err
+		}
+		data = append(data, globalStatus...)
 	} else {
 		globalStatus, err := GlobalStatus(m, db)
 		if err != nil {
