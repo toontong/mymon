@@ -49,7 +49,7 @@ func ProxySQLConnectionPoolStats(m *MysqlIns, db mysql.Conn) ([]*MetaData, error
 	data := make([]*MetaData, len(rows)*8)
 	j := 0
 
-	_append := func(host, key string, val int64) {
+	_append := func(host, key, typ string, val int64) {
 		k := fmt.Sprintf("%v/%v", host, key)
 		data[j] = NewMetric(k)
 		data[j].SetValue(val)
@@ -61,24 +61,24 @@ func ProxySQLConnectionPoolStats(m *MysqlIns, db mysql.Conn) ([]*MetaData, error
 
 		host := fmt.Sprintf("%v:%v", row.Str(1), row.Str(2))
 		ConnUsed, _ := row.Int64Err(4)
-		_append(host, "ConnUsed", ConnUsed)
+		_append(host, "ConnUsed", ORIGIN, ConnUsed)
 
 		ConnFree, _ := row.Int64Err(5)
-		_append(host, "ConnFree", ConnFree)
+		_append(host, "ConnFree", ORIGIN, ConnFree)
 
 		ConnOK, _ := row.Int64Err(6)
-		_append(host, "ConnOK", ConnOK)
+		_append(host, "ConnOK", ORIGIN, ConnOK)
 
 		ConnERR, _ := row.Int64Err(7)
-		_append(host, "ConnERR", ConnERR)
+		_append(host, "ConnERR", ORIGIN, ConnERR)
 		Queries, _ := row.Int64Err(8)
-		_append(host, "Queries", Queries)
+		_append(host, "Queries", DELTA_PS, Queries)
 		Bytes_data_sent, _ := row.Int64Err(9)
-		_append(host, "Bytes_data_sent", Bytes_data_sent)
+		_append(host, "Bytes_data_sent", DELTA_PS, Bytes_data_sent)
 		Bytes_data_recv, _ := row.Int64Err(10)
-		_append(host, "Bytes_data_recv", Bytes_data_recv)
+		_append(host, "Bytes_data_recv", DELTA_PS, Bytes_data_recv)
 		Latency_us, _ := row.Int64Err(11)
-		_append(host, "Latency_us", Latency_us)
+		_append(host, "Latency_us", ORIGIN, Latency_us)
 	}
 	return data[:i], nil
 }
